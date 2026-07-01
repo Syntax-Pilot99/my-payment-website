@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Digital Toolkit</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+    <div class="min-h-screen flex flex-col justify-center items-center px-4 text-center">
+        <span class="bg-blue-600 text-xs font-bold uppercase px-3 py-1 rounded-full mb-4 text-blue-100">Most Popular</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 max-w-3xl leading-tight">
+            Grow Your Business 10x with our <span class="text-blue-500">Ultimate Digital Toolkit</span>
+        </h1>
+        <p class="text-gray-400 text-lg md:text-xl mb-8 max-w-2xl">
+            Get instant access to premium ready-to-use templates, assets, and guides. Save 100+ hours of manual work.
+        </p>
+
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl border border-gray-700 max-w-sm w-full text-left">
+            <h3 class="text-xl font-bold mb-2 text-center">⚡ Complete Bundle (Zip File)</h3>
+            <p class="text-gray-400 text-sm mb-6 text-center">Instant Download Link Sent to Email</p>
+            
+            <div class="flex justify-center items-baseline mb-6">
+                <span class="text-4xl font-extrabold">₹399</span>
+                <span class="text-gray-500 line-through ml-2 text-sm">₹1,999</span>
+            </div>
+
+            <div class="mb-6">
+                <label class="text-sm text-gray-400 block mb-1">Email Address</label>
+                <input type="email" id="custEmail" placeholder="your@email.com" class="w-full p-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500">
+            </div>
+
+            <button onclick="startTestPayment()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200 shadow-lg shadow-blue-500/20 cursor-pointer text-center">
+                Buy Now & Download 🚀
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function startTestPayment() {
+            var userEmail = document.getElementById('custEmail').value;
+            
+            if(!userEmail) {
+                alert("Kripya apna Email dalein!");
+                return;
+            }
+
+            // Testing ke liye automatic payment success simulation
+            alert("Testing Mode: Simulated Payment Successful!");
+            
+            // Backend (`main.py`) ko data bhejna
+            fetch('/payment-webhook', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: "payment.captured",
+                    payload: {
+                        payment: {
+                            entity: {
+                                email: userEmail,
+                                notes: { name: "Premium Customer" }
+                            }
+                        }
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Backend Response: Link triggered check Pydroid terminal!");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
+
