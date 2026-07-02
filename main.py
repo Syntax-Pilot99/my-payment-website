@@ -4,11 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import stripe
 
-# Stripe key ko env se read karna
+# Render ke environment variable se asli secret key read karna
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 app = FastAPI()
 
+# CORS configuration taaki Vercel frontend isse connect kar sake
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,7 +24,7 @@ class Item(BaseModel):
 @app.post("/create-checkout-session")
 async def create_checkout_session(item: Item):
     try:
-        # Asli Stripe checkout session banana
+        # Asli Stripe Checkout Session generate karna
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -43,4 +44,5 @@ async def create_checkout_session(item: Item):
         )
         return {"id": session.id}
     except Exception as e:
+        # Agar koi dikkat aaye toh error message return karna
         return {"error": str(e)}
