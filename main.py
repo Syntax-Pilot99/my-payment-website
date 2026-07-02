@@ -1,13 +1,14 @@
-from fastapi import FastAPI, Request, HTTPException
+import os
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
+from pydantic import BaseModel
+import stripe
 
-app = FastAPI(
-    title="AI Content Creator Kit API",
-    version="1.0.0"
-)
+# Stripe key ko env se read karna
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-# CORS Settings
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,47 +17,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Home Route
-@app.get("/")
-async def home():
-    return {
-        "status": "System Online",
-        "product": "AI Content Creator Kit API"
-    }
+class Item(BaseModel):
+    email: str
 
-# Payment Webhook
-@app.post("/payment-webhook")
-async def payment_webhook(request: Request):
+@app.post("/create-checkout-session")
+async def create_checkout_session(item: Item):
     try:
-        payload = await request.json()
-
-        if payload.get("event") == "payment.captured":
-            payment = payload.get("payload", {}).get("payment", {}).get("entity", {})
-
-            customer_email = payment.get("email", "No Email")
-
-            print(f"SUCCESS: Sending product to {customer_email}")
-
-            return {
-                "status": "success",
-                "message": f"Product link triggered for {customer_email}"
-            }
-
-        return {
-            "status": "ignored",
-            "message": "Event is not payment.captured"
-        }
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Webhook Error: {str(e)}"
+        # Asli Stripe checkout session banana
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'inr',
+                    'product_data': {
+                        'name': 'Ultimate Digital Toolkit',
+                    },
+                    'unit_amount': 39900, # ₹399.00 (paise me)
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url='https://digital-toolkit-frontend.vercel.app',
+            cancel_url='https://digital-toolkit-frontend.vercel.app',
+            customer_email=item.email
         )
-
-# Run Server
-if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000
-    )
+        return {"id": session.id}
+    except Exception as e:
+        return {"error": str(e)}
